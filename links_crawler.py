@@ -4,12 +4,19 @@ from lxml import etree
 
 KEYWORD = "互联网金融"
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.163 Safari/535.1"
+COOKIE = ""
 
 
 class links_crawler(object):
     def __init__(self):
-        self.base_url = "https://weixin.sogou.com/weixin?query={}&type=2".format(KEYWORD)
+        self.keyword = KEYWORD
+        self.base_url = "https://weixin.sogou.com/weixin?query={}&type=2".format(self.keyword)
         self.user_agent = USER_AGENT
+        self.cookie = COOKIE
+        print("links_crawler模块：请先访问以下网址获取cookie，调用self.set_cookie更改cookie：")
+        print(self.base_url)
+        print("links_crawler模块：调用self.set_keyword以更改搜索关键词")
+        print('+'*100)
 
     def get_page(self, url):
         '''
@@ -18,7 +25,8 @@ class links_crawler(object):
         :return: 网页源代码
         '''
         headers = {
-            'User-Agent': self.user_agent
+            'User-Agent': self.user_agent,
+            'Cookie': self.cookie
         }
         response = requests.get(url, headers=headers)
         return response.text
@@ -29,8 +37,6 @@ class links_crawler(object):
         :param html:网页源代码
         :return:文章标题和链接的生成器
         '''
-        invalid_char = '/ \ : * " < > | ?'.split(' ')
-        link_dict = {}
         html = etree.HTML(html)
         lis = html.xpath("//ul[@class='news-list']/li")
         for li in lis:
@@ -65,3 +71,19 @@ class links_crawler(object):
                 break
             time.sleep(1)
         return links_dict
+
+    def set_cookie(self, cookie):
+        '''
+        设置cookie
+        :param cookie: cookie字符串
+        '''
+        self.cookie = cookie
+
+    def set_keyword(self, keyword):
+        '''
+        设置搜索关键词
+        :param keyword: 搜索关键词
+        '''
+        self.keyword = keyword
+        self.base_url = "https://weixin.sogou.com/weixin?query={}&type=2".format(self.keyword)
+        print('搜索关键词：',self.keyword)
